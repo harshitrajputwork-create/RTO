@@ -101,6 +101,8 @@ export function SetupPage({ go }: PageProps) {
         </div>
         <div style={{ padding: "16px 18px 6px", overflow: "hidden" }}>
           <Step icon="🛍️" bg="var(--navy-10)" title="Trigger: new COD order on Shopify" desc="Prepaid orders skip this flow" right={<span className="pill grey" style={{ fontSize: 11 }}>Shopify webhook</span>} />
+          <Step icon="⭐" bg="var(--navy-10)" title="Skip trusted repeat buyers" desc="2+ delivered COD orders, no RTO → ships straight away" off
+            right={<span className="pill grey" style={{ fontSize: 11 }} title="Month 4 · needs ~3 months of order history">Unlocks in M4</span>} />
           <Step icon="🔎" bg="var(--blue-10)" wait="Instantly" title="Address + phone check" desc="Missing house no. · invalid pincode · bad number" off={!addrCheck} right={<Toggle on={addrCheck} onChange={setAddrCheck} />} />
           <Step icon="💬" bg="var(--blue-10)" wait="After 2 min" title="WhatsApp confirmation" desc={`Template: COD confirm · ${lang}${addrCheck ? " · asks for missing address" : ""}`}
             right={<button className="btn-secondary" style={{ height: 30, fontSize: 12.5 }} onClick={() => setPreview("confirm")}>Preview</button>} />
@@ -148,7 +150,7 @@ export function SetupPage({ go }: PageProps) {
             <li style={{ fontSize: 13.5, lineHeight: "20px" }}>Max 2 messages + 1 call per order</li>
             <li style={{ fontSize: 13.5, lineHeight: "20px" }}>Calls only 9 AM – 8 PM</li>
             <li style={{ fontSize: 13.5, lineHeight: "20px" }}>Silent orders: <b>{fallback.toLowerCase()}</b></li>
-            <li style={{ fontSize: 13.5, lineHeight: "20px" }}>Holdout group for A/B (10%)</li>
+            <li style={{ fontSize: 13.5, lineHeight: "20px" }}>Holdout group for A/B (20%)</li>
           </ul>
         </div>
         <button className="btn-primary" style={{ height: 46, justifyContent: "center", fontSize: 15 }} onClick={() => { setLive(true); setTimeout(() => go("confirm"), 1100); }}>

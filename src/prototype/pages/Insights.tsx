@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { PageProps } from "../ProtoApp";
 
-const WEEKS = [31, 30.5, 31.2, 29.8, 27.4, 26.1, 25.3, 24.6, 23.2, 22.8, 22.1, 21.4];
+const WEEKS = [23.1, 22.8, 23.2, 22.6, 21.0, 19.9, 19.1, 18.4, 17.6, 17.1, 16.6, 16.1];
 
 const PINCODES = [
   { pin: "311001", city: "Bhilwara", orders: 412, rto: 34 },
@@ -29,13 +29,13 @@ const COURIERS = [
 ];
 
 function Trend() {
-  const w = 460, h = 130, min = 18, max = 33;
+  const w = 460, h = 130, min = 14, max = 25;
   const pts = WEEKS.map((v, i) => [ (i / (WEEKS.length - 1)) * w, h - ((v - min) / (max - min)) * h ] as const);
   const d = pts.map((p, i) => `${i ? "L" : "M"}${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(" ");
   const goLive = pts[3][0];
   return (
     <svg width={w} height={h + 22} style={{ overflow: "visible" }}>
-      {[20, 25, 30].map((g) => {
+      {[15, 20, 25].map((g) => {
         const y = h - ((g - min) / (max - min)) * h;
         return (
           <g key={g}>
@@ -76,11 +76,12 @@ export function InsightsPage({ go }: PageProps) {
       {/* Trend */}
       <div className="panel" style={{ padding: "16px 20px", display: "grid", gridTemplateColumns: "200px 1fr", gap: 16 }}>
         <div>
-          <div className="dr-h">COD RTO rate · North Star</div>
+          <div className="dr-h">RTO rate · all orders · North Star</div>
           <div style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
-            <span style={{ fontSize: 38, fontWeight: 700, color: "var(--navy)" }}>21.4%</span>
+            <span style={{ fontSize: 38, fontWeight: 700, color: "var(--navy)" }}>16.1%</span>
           </div>
-          <div style={{ fontSize: 13, color: "#067647", fontWeight: 600 }}>▼ 9.6 pts since go-live</div>
+          <div style={{ fontSize: 13, color: "#067647", fontWeight: 600 }}>▼ 7.0 pts since go-live</div>
+          <div className="caption" style={{ marginTop: 2 }}>COD only: 31% → 22%</div>
           <div style={{ marginTop: 14, padding: "10px 12px", borderRadius: 10, background: "var(--pale)" }}>
             <div className="caption">RTO cost saved · last 30 days</div>
             <div style={{ fontSize: 22, fontWeight: 700, color: "var(--navy)" }}>₹2.4L</div>

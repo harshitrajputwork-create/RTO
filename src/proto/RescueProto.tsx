@@ -33,7 +33,7 @@ export const RESCUE_SCENARIOS: Scenario[] = [
         text: "Done ✅ Re-attempt tomorrow, 4–8 PM.\nPlease keep ₹1,799 ready — or skip the cash and pay online 👇",
         buttons: ["💳 Pay online"],
         patch: { status: "Rescued · re-attempt booked", tone: "success", action: "Tomorrow 4–8 PM", saved: 340 },
-        event: "Re-attempt + time slot pushed to courier",
+        event: "Re-attempt + time slot sent back to courier via API ✓",
       },
     ],
   },
@@ -98,7 +98,7 @@ export const RESCUE_SCENARIOS: Scenario[] = [
         kind: "bot", time: "14:10",
         text: "Thanks Pooja ji ✅ New address saved:\n🏢 Plot 7, Malviya Nagar, Jaipur 302017\n📦 Re-attempt: tomorrow, office hours",
         patch: { status: "Rescued · address changed", tone: "success", action: "New address, tomorrow", saved: 340 },
-        event: "Address updated with courier + re-attempt booked",
+        event: "New address + re-attempt sent back to courier via API ✓",
       },
     ],
   },
@@ -161,6 +161,11 @@ function RescueDashboard({ cursors, activeId }: { cursors: Record<string, number
             </span>
           </div>
         ))}
+        <div className="tr" style={{ gridTemplateColumns: cols, background: "var(--warning-bg)" }}>
+          <span style={{ fontWeight: 600, color: "var(--navy)" }}>#1027</span><span>Karan M.</span><span style={{ color: "var(--slate)" }}>Not available · attempt 3</span>
+          <span style={{ display: "flex", gap: 6, alignItems: "center" }}><span className="pill warning" style={{ fontSize: 11.5, padding: "1px 9px" }}>No reply on WA + voice · your call</span></span>
+          <span style={{ display: "flex", gap: 4 }}><button className="btn-secondary" style={{ height: 24, fontSize: 11, padding: "0 8px" }}>Retry</button><button className="btn-secondary" style={{ height: 24, fontSize: 11, padding: "0 8px" }}>Return</button></span>
+        </div>
         <div className="tr" style={{ gridTemplateColumns: cols, opacity: 0.55 }}>
           <span style={{ fontWeight: 600 }}>#1029</span><span>Arjun P.</span><span>Customer not available</span>
           <span><span className="pill success" style={{ fontSize: 11.5, padding: "1px 9px" }}>Delivered on re-attempt</span></span><span>Saved</span>

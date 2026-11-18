@@ -183,17 +183,17 @@ export function MetricsSlide(p: SlideProps) {
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 24, height: "100%" }}>
         <div className="card" style={{ background: "var(--g3)", color: "#fff", border: "none", display: "flex", flexDirection: "column" }}>
           <div style={{ fontSize: 13, fontWeight: 600, letterSpacing: ".1em", textTransform: "uppercase", opacity: 0.8 }}>North Star</div>
-          <div style={{ fontSize: 30, lineHeight: "38px", fontWeight: 600, marginTop: 10 }}>COD RTO rate</div>
-          <div style={{ fontSize: 15, opacity: 0.85, marginTop: 4 }}>% of shipped COD orders that come back</div>
+          <div style={{ fontSize: 30, lineHeight: "38px", fontWeight: 600, marginTop: 10 }}>RTO rate · all orders</div>
+          <div style={{ fontSize: 15, opacity: 0.85, marginTop: 4 }}>% of all shipped orders (COD + prepaid) that come back</div>
           <div style={{ display: "flex", alignItems: "baseline", gap: 14, marginTop: 26 }}>
-            <span style={{ fontSize: 46, fontWeight: 700 }}>30%</span>
+            <span style={{ fontSize: 46, fontWeight: 700 }}>23%</span>
             <span style={{ fontSize: 22, opacity: 0.7 }}>→</span>
-            <span style={{ fontSize: 46, fontWeight: 700 }}>21%</span>
+            <span style={{ fontSize: 46, fontWeight: 700 }}>16%</span>
           </div>
-          <div style={{ fontSize: 14, opacity: 0.8 }}>−30% for active merchants by Month 6</div>
+          <div style={{ fontSize: 14, opacity: 0.8 }}>−30% for active merchants by Month 6 · COD RTO tracked per initiative</div>
           <div style={{ marginTop: "auto", display: "grid", gap: 8, fontSize: 14, lineHeight: "20px", color: "rgba(255,255,255,.88)" }}>
             <div>✓ It is the merchant's real pain</div>
-            <div>✓ Comes from courier data, hard to game</div>
+            <div>✓ Can't be gamed by moving orders from COD to prepaid</div>
             <div>✓ Every initiative ladders into it</div>
             <div style={{ marginTop: 8, paddingTop: 12, borderTop: "1px solid rgba(255,255,255,.15)" }}>
               Business proof: <b>₹ RTO cost saved / merchant / month</b>

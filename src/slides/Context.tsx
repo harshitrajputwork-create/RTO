@@ -24,8 +24,7 @@ export function TitleSlide({ page, total }: SlideProps) {
             fontSize: 20, fontWeight: 500,
           }}
         >
-          Fix the biggest leak first <span style={{ opacity: 0.6 }}>→</span> prove it{" "}
-          <span style={{ opacity: 0.6 }}>→</span> then scale
+          Keep COD. Kill the RTO that comes with it.
         </div>
       </div>
       <div style={{ position: "absolute", bottom: 64, left: 96, fontSize: 15, color: "rgba(255,255,255,.75)" }}>
@@ -307,10 +306,11 @@ export function PrioritySlide(p: SlideProps) {
             </ul>
           </div>
           <div className={`card brand reveal ${step >= 2 ? "" : "hide"}`}>
-            <div className="h4">Two rules on top</div>
+            <div className="h4">Rules on top</div>
             <ul className="bullets" style={{ marginTop: 10 }}>
               <li><b>Data first:</b> insights + prepaid nudges need 2–3 months of our own data</li>
               <li><b>Never trade conversion for RTO</b> — prepaid push waits till we know whom to nudge</li>
+              <li><b>Why not rescue first?</b> Needs courier integrations, and the parcel has already shipped. Confirming stops the loss for ₹0.</li>
             </ul>
           </div>
         </div>
@@ -326,7 +326,7 @@ export function RoadmapSlide(p: SlideProps) {
     { m: "M1", name: "Discover + MVP", goal: "Catch bad orders before they ship", items: ["10–15 merchant interviews + baseline", "COD confirm on WhatsApp", "Address fix in chat", "Voice fallback", "Shopify order tags"], tag: "Support", color: "var(--blue)" },
     { m: "M2", name: "Validate", goal: "Prove it without killing sales", items: ["15–20 beta merchants", "Holdout group vs Relay", "Track RTO + genuine-order drop", "Go / no-go gate"], tag: "Support", color: "var(--blue)" },
     { m: "M3", name: "Iterate + Rescue", goal: "Save orders failing at the door", items: ["Tune timing, copy, languages", "NDR rescue on WA + voice", "Delivery-day heads-up"], tag: "Support", color: "var(--blue)" },
-    { m: "M4", name: "Insights", goal: "Show where RTO comes from", items: ["RTO by pincode, product, ad source", "Repeat-refuser flags", "Merchant risk rules", "Courier fake-attempt view"], tag: "Platform", color: "var(--navy-light)" },
+    { m: "M4", name: "Insights", goal: "Show where RTO comes from", items: ["RTO by pincode, product, ad source", "Repeat-refuser flags", "Trusted buyers skip confirm", "Merchant risk rules", "Courier fake-attempt view"], tag: "Platform", color: "var(--navy-light)" },
     { m: "M5", name: "Grow", goal: "Cut RTO at the root", items: ["Prepaid nudge for risky orders only", "Pay link inside WhatsApp", "Pincode-targeted campaigns", "Win back cancelled orders"], tag: "Marketing + Sales", color: "var(--magenta)" },
     { m: "M6", name: "Scale", goal: "From beta to every merchant", items: ["Self-serve Shopify setup", "Monthly ROI report", "Case studies for sales", "Outcome-based pricing"], tag: "Sales", color: "var(--magenta)" },
   ];
