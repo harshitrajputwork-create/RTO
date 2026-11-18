@@ -3,6 +3,8 @@ import { SetupPage } from "./pages/Setup";
 import { ConfirmLivePage, RescueLivePage } from "./pages/Live";
 import { InsightsPage } from "./pages/Insights";
 import { RulesPage } from "./pages/Rules";
+import { BetaPage } from "./pages/Beta";
+import { WinbackPage } from "./pages/Winback";
 
 export type PageProps = { go: (id: string) => void };
 
@@ -43,6 +45,16 @@ export const CHAPTERS: Chapter[] = [
     component: ConfirmLivePage,
   },
   {
+    id: "beta", nav: "Beta results", icon: "⚗", crumb: "RTO Suite", month: "M2 · Beta", tag: "M2", phase: "Month 2 · beta test + go/no-go gate", solves: "Does the MVP actually work?",
+    title: "Beta results", lead: "Relay vs a holdout group, with the go/no-go decision.",
+    guide: {
+      what: "Month 2: the MVP runs with 15–20 beta merchants. 20% of orders get no messages (the holdout), so we can measure the real effect.",
+      try: "Read the gate on the right: five pass/fail criteria agreed before the beta. Then see what we'll change before scaling.",
+      why: "Nothing after this gets built unless the gate passes. Proves RTO drops without losing genuine orders.",
+    },
+    component: BetaPage,
+  },
+  {
     id: "rescue", nav: "Failed deliveries", icon: "↻", crumb: "RTO Suite", month: "M3", tag: "M3", phase: "Month 3 · after the M2 gate", solves: "Not reachable at the door",
     title: "Failed deliveries", lead: "Rescue the order inside the 24–48h window before it returns.",
     guide: {
@@ -63,8 +75,8 @@ export const CHAPTERS: Chapter[] = [
     component: InsightsPage,
   },
   {
-    id: "rules", nav: "Risk rules", icon: "⚑", crumb: "RTO Suite", month: "M5", tag: "M5", phase: "Month 5 · growth phase", solves: "Weak intent: COD with no skin in the game",
-    title: "Risk rules", lead: "Applied right after the shopper confirms.",
+    id: "rules", nav: "Prepaid nudge", icon: "⚑", crumb: "RTO Suite", month: "M5", tag: "M5", phase: "Month 5 · growth phase", solves: "Weak intent: COD with no skin in the game",
+    title: "Prepaid nudge rules", lead: "Applied right after the shopper confirms.",
     guide: {
       what: "Nudge only risky orders to prepaid. Everyone else keeps one-tap COD.",
       try: "Change the discount, or turn on the ₹99 token. Watch the net saving: too big a discount stops paying for itself.",
@@ -72,7 +84,25 @@ export const CHAPTERS: Chapter[] = [
     },
     component: RulesPage,
   },
+  {
+    id: "winback", nav: "Win-back & offers", icon: "✦", crumb: "RTO Suite", month: "M5", tag: "M5", phase: "Month 5 · growth phase", solves: "Lost intent + risky pincodes",
+    title: "Win-back & offers", lead: "WhatsApp campaigns built from what the RTO data showed.",
+    guide: {
+      what: "The insights turned into action: win back shoppers who cancelled, and offer prepaid deals in high-RTO pincodes.",
+      try: "Switch between the two campaigns. The audience comes straight from M1 cancels and M4 hotspots.",
+      why: "Closes the loop: catch → learn → act. RTO work starts driving revenue and prepaid share, not just saving cost.",
+    },
+    component: WinbackPage,
+  },
 ];
+
+const TIPS: Record<string, string> = {
+  M1: "Month 1 · MVP: built first",
+  M2: "Month 2 · beta test with 15–20 merchants + go/no-go gate",
+  M3: "Month 3 · built only after the beta passes",
+  M4: "Month 4 · needs ~3 months of order data",
+  M5: "Month 5 · growth phase",
+};
 
 function idFromHash() {
   const h = window.location.hash.replace("#", "");
@@ -118,7 +148,7 @@ export default function ProtoApp() {
   const NavLink = ({ c }: { c: Chapter }) => (
     <button className={`side-link ${c.id === active ? "on" : ""}`} onClick={() => go(c.id)}>
       <span className="ic">{c.icon}</span>{c.nav}
-      <span className={`mtag ${c.tag === "M1" ? "mvp" : ""}`}>{c.tag}</span>
+      <span className={`mtag ${c.tag === "M1" ? "mvp" : c.tag === "M2" ? "beta" : ""}`} data-tip={TIPS[c.tag]}>{c.tag}</span>
     </button>
   );
   const Dim = ({ icon, label }: { icon: string; label: string }) => (
@@ -195,7 +225,7 @@ export default function ProtoApp() {
             <div className="page-lead">{ch.lead}</div>
           </div>
           <div className="ctx">
-            <span className={`ctx-phase ${ch.tag === "M1" ? "mvp" : ""}`}>{ch.phase}</span>
+            <span className={`ctx-phase ${ch.tag === "M1" ? "mvp" : ""}`} title={TIPS[ch.tag]}>{ch.phase}</span>
             <span className="ctx-solves">Solves: <b>{ch.solves}</b></span>
           </div>
         </div>

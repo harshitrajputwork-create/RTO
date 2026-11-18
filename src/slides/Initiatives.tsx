@@ -274,9 +274,11 @@ export function LaunchSlide(p: SlideProps) {
   const chapters = [
     { n: 1, t: "Set up the flow", d: "Language, timing, voice fallback, cost per order", m: "M1" },
     { n: 2, t: "COD confirmation, live", d: "Shopper chat + merchant dashboard + order details", m: "M1" },
-    { n: 3, t: "Failed-delivery rescue, live", d: "Not home · fake attempt · new address on call", m: "M3" },
-    { n: 4, t: "Insights", d: "RTO by pincode, product, ad source, courier", m: "M4" },
-    { n: 5, t: "Rules + growth", d: "Prepaid nudge only for risky orders", m: "M5" },
+    { n: 3, t: "Beta results", d: "Relay vs holdout · go / no-go gate", m: "M2" },
+    { n: 4, t: "Failed-delivery rescue, live", d: "Not home · fake attempt · new address on call", m: "M3" },
+    { n: 5, t: "Insights", d: "RTO by pincode, product, ad source, courier", m: "M4" },
+    { n: 6, t: "Prepaid nudge", d: "Only for risky orders", m: "M5" },
+    { n: 7, t: "Win-back & offers", d: "Campaigns from cancels + hotspots", m: "M5" },
   ];
   return (
     <section className="slide" style={{ background: "var(--g4)" }}>
@@ -285,10 +287,10 @@ export function LaunchSlide(p: SlideProps) {
       <h1 className="title fade-up">Let's see it <span className="grad-text">working</span></h1>
       <p className="lead fade-up">Not wireframes on a slide: a clickable product, walked through in roadmap order.</p>
       <div className="body fade-up" style={{ display: "grid", gridTemplateColumns: "1.3fr 1fr", gap: 48, alignItems: "center" }}>
-        <div style={{ display: "grid", gap: 12 }}>
+        <div style={{ display: "grid", gap: 8 }}>
           {chapters.map((c) => (
-            <a key={c.n} href={`/prototype/#${["setup", "confirm", "rescue", "insights", "rules"][c.n - 1]}`}
-              style={{ textDecoration: "none", display: "grid", gridTemplateColumns: "44px 1fr auto", gap: 16, alignItems: "center", padding: "14px 18px", background: "#fff", borderRadius: 14, border: "1px solid rgba(0,86,165,.13)", boxShadow: "var(--shadow-1)" }}>
+            <a key={c.n} href={`/prototype/#${["setup", "confirm", "beta", "rescue", "insights", "rules", "winback"][c.n - 1]}`}
+              style={{ textDecoration: "none", display: "grid", gridTemplateColumns: "44px 1fr auto", gap: 16, alignItems: "center", padding: "8px 18px", background: "#fff", borderRadius: 14, border: "1px solid rgba(0,86,165,.13)", boxShadow: "var(--shadow-1)" }}>
               <span style={{ width: 40, height: 40, borderRadius: "50%", background: c.m === "M1" ? "var(--g1)" : "var(--blue-10)", color: c.m === "M1" ? "#fff" : "var(--blue)", display: "grid", placeItems: "center", fontWeight: 600 }}>{c.n}</span>
               <span>
                 <span style={{ display: "block", fontSize: 18, fontWeight: 600, color: "var(--navy)" }}>{c.t}</span>
