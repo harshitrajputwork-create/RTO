@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-export type SlideProps = { page: number; total: number };
+export type SlideProps = { page: number; total: number; step?: number };
 
 type Props = SlideProps & {
   eyebrow?: string;

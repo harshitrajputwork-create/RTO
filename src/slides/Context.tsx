@@ -167,68 +167,91 @@ export function UsersSlide(p: SlideProps) {
   );
 }
 
-/* 04 — Why RTO happens */
+/* 04 — Why RTO happens (animated, 7 builds) */
 export function WhySlide(p: SlideProps) {
+  const step = p.step ?? 0;
   const stages = ["Discovery", "Checkout", "Post-order", "Dispatch", "In transit", "Delivery", "Failed delivery", "RTO"];
   const sub = ["Ad / Instagram", "Picks COD", "First 24h", "Courier pickup", "2–7 days", "Doorstep", "NDR · 24–48h", "Loss"];
-  const reasons = [
-    { t: "Bad address / contact", d: "“Near temple”, wrong pincode, wrong number", cols: [2, 3], stage: "Checkout → Post-order", priority: "now" },
-    { t: "Not reachable at delivery", d: "Not home, not picking calls, no cash", cols: [6, 7], stage: "Delivery → NDR", priority: "now" },
-    { t: "Weak or changed intent", d: "Impulse buy, regret, ordered elsewhere", cols: [1, 5], stage: "Discovery → In transit", priority: "later" },
-    { t: "Slow + silent journey", d: "No updates, intent fades by day 5", cols: [4, 5], stage: "Dispatch → In transit", priority: "later" },
-    { t: "Fake / fraud orders", d: "Pranks, serial refusers", cols: [2, 2], stage: "Checkout", priority: "parked" },
+  const causes = [
+    { t: "Bad address / contact", d: "“Near temple”, wrong pincode, wrong number", cols: [2, 3], n: 10, pr: "now" },
+    { t: "Not reachable at the door", d: "Not home, not picking calls, no cash", cols: [6, 7], n: 8, pr: "now" },
+    { t: "Weak or changed intent", d: "Impulse buy, regret, ordered elsewhere", cols: [1, 5], n: 7, pr: "later" },
+    { t: "Slow + silent journey", d: "No updates, intent fades by day 5", cols: [4, 5], n: 2, pr: "later" },
+    { t: "Fake / fraud orders", d: "Pranks, serial refusers", cols: [2, 2], n: 3, pr: "parked" },
   ];
+  const shown = causes.slice(0, Math.min(step, causes.length));
+  const tally = shown.reduce((a, c) => a + c.n, 0);
+  const lit = step >= 6;
   const touch: Record<number, "wa" | "voice" | "both" | undefined> = { 3: "both", 6: "wa", 7: "both" };
+  const dots = Array.from({ length: 14 });
+  const redCount = Math.round((tally / 100) * dots.length);
+  const cols = "repeat(8, 1fr) 200px";
+
   return (
-    <Slide {...p} eyebrow="Root causes" title={<>RTO risk is created <span className="grad-text">early</span> — but shows up <span className="grad-text">late</span></>}>
-      {/* Journey */}
-      <div style={{ display: "grid", gridTemplateColumns: "330px repeat(8, 1fr)", gap: 8, position: "relative" }}>
-        <div style={{ alignSelf: "start", paddingTop: 14 }}>
-          <div className="caption" style={{ textTransform: "uppercase", letterSpacing: ".08em", fontWeight: 600 }}>Order journey</div>
-        </div>
-        <div style={{ position: "absolute", left: 380, right: 50, top: 27, height: 2, background: "var(--blue-20)" }} />
-        {stages.map((s, i) => (
-          <div key={s} style={{ textAlign: "center", position: "relative" }}>
-            <div style={{
-              width: 56, height: 56, margin: "0 auto", borderRadius: "50%", display: "grid", placeItems: "center",
-              fontWeight: 600, fontSize: 18,
-              background: i === 7 ? "var(--error)" : touch[i + 1] ? "var(--g1)" : "#fff",
-              color: i === 7 || touch[i + 1] ? "#fff" : "var(--navy)",
-              border: touch[i + 1] || i === 7 ? "none" : "2px solid var(--blue-20)",
-            }}>{i + 1}</div>
-            <div className="h4" style={{ fontSize: 16, marginTop: 10 }}>{s}</div>
-            <div className="caption">{sub[i]}</div>
-            <div style={{ height: 30, marginTop: 8 }}>{touch[i + 1] && <ChannelTag kind={touch[i + 1]!} />}</div>
+    <Slide {...p} eyebrow="Root causes" title={<>RTO risk is created <span className="grad-text">early</span> — but shows up <span className="grad-text">late</span></>}
+      footerNote="Illustrative split of a ~30% COD RTO · address + refusal ≈ half of RTO (industry data)">
+      <div style={{ display: "grid", gridTemplateColumns: cols, gap: 8, alignItems: "start" }}>
+        <div style={{ gridColumn: "1 / 9", position: "relative" }}>
+          <div style={{ position: "absolute", left: "6.25%", right: "6.25%", top: 28, height: 2, background: "var(--blue-20)" }}>
+            {dots.map((_, i) => (
+              <span key={i} className="order-dot" style={{
+                animationDuration: "7s", animationDelay: `${-(i * 7) / dots.length}s`,
+                background: i < redCount ? "var(--error)" : "var(--blue)", opacity: i < redCount ? 0.9 : 0.55,
+              }} />
+            ))}
           </div>
-        ))}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(8, 1fr)", gap: 8 }}>
+            {stages.map((st, i) => {
+              const isTouch = lit && touch[i + 1];
+              return (
+                <div key={st} style={{ textAlign: "center", position: "relative" }}>
+                  <div style={{
+                    width: 56, height: 56, margin: "0 auto", borderRadius: "50%", display: "grid", placeItems: "center", fontWeight: 600, fontSize: 18,
+                    background: i === 7 ? "var(--error)" : isTouch ? "var(--g1)" : "#fff",
+                    color: i === 7 || isTouch ? "#fff" : "var(--navy)", border: isTouch || i === 7 ? "none" : "2px solid var(--blue-20)",
+                    transition: "all .4s", position: "relative", zIndex: 1,
+                  }}>{i + 1}</div>
+                  <div className="h4" style={{ fontSize: 15.5, marginTop: 8 }}>{st}</div>
+                  <div className="caption">{sub[i]}</div>
+                  <div style={{ height: 28, marginTop: 6 }} className={`reveal ${isTouch ? "" : "hide"}`}>{touch[i + 1] && <ChannelTag kind={touch[i + 1]!} />}</div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+        <div className="card" style={{ background: "var(--g3)", color: "#fff", border: "none", padding: "16px 18px", textAlign: "center" }}>
+          <div style={{ fontSize: 13, opacity: 0.8 }}>Out of 100 COD orders</div>
+          <div key={tally} className="tally-pop" style={{ fontSize: 52, fontWeight: 700, lineHeight: "60px" }}>{tally}</div>
+          <div style={{ fontSize: 13, opacity: 0.85 }}>{step === 0 ? "orders flowing… press →" : "come back as RTO"}</div>
+        </div>
       </div>
 
-      {/* Reasons mapped to stages */}
-      <div style={{ marginTop: 14, display: "grid", gap: 6 }}>
-        <div className="caption" style={{ textTransform: "uppercase", letterSpacing: ".08em", fontWeight: 600, marginBottom: 2 }}>Why it happens · where it starts</div>
-        {reasons.map((r) => {
-          const color = r.priority === "now" ? "var(--blue)" : r.priority === "later" ? "var(--sky)" : "var(--border)";
+      <div style={{ marginTop: 12, display: "grid", gap: 4 }}>
+        {causes.map((c, i) => {
+          const on = i < step;
+          const color = c.pr === "now" ? "var(--blue)" : c.pr === "later" ? "var(--sky)" : "var(--border)";
+          const right = c.cols[1] >= 5;
           return (
-            <div key={r.t} style={{ display: "grid", gridTemplateColumns: "330px repeat(8, 1fr)", gap: 8, alignItems: "center", padding: "8px 0", borderTop: "1px solid var(--line)" }}>
-              <div>
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <span className="h4" style={{ fontSize: 16.5 }}>{r.t}</span>
-                  <span className={`pill ${r.priority === "now" ? "blue" : "grey"}`} style={{ fontSize: 11, padding: "0 8px" }}>
-                    {r.priority === "now" ? "Fix first" : r.priority === "later" ? "Growth stage" : "Parked"}
-                  </span>
-                </div>
-                <div className="small" style={{ fontSize: 13.5, lineHeight: "19px" }}>{r.d}</div>
+            <div key={c.t} className={`reveal ${on ? "" : "hide"}`} style={{ display: "grid", gridTemplateColumns: cols, gap: 8, alignItems: "center", padding: "7px 0", borderTop: "1px solid var(--line)" }}>
+              <div style={{ gridColumn: `${c.cols[0]} / ${c.cols[1] + 1}`, gridRow: 1, height: 10, borderRadius: 5, background: color }} />
+              <div style={{ gridColumn: right ? "1 / 6" : `${c.cols[1] + 1} / 9`, gridRow: 1, display: "flex", alignItems: "center", gap: 10, justifyContent: right ? "flex-end" : "flex-start", padding: "0 10px" }}>
+                <span className="h4" style={{ fontSize: 16 }}>{c.t}</span>
+                <span className="small" style={{ fontSize: 13.5 }}>{c.d}</span>
+                <span className={`pill ${c.pr === "now" ? "blue" : "grey"}`} style={{ fontSize: 11, padding: "0 8px" }}>
+                  {c.pr === "now" ? "Fix first" : c.pr === "later" ? "Growth stage" : "Parked"}
+                </span>
               </div>
-              <div style={{ gridColumn: `${r.cols[0] + 1} / ${r.cols[1] + 2}`, gridRow: 1, height: 10, borderRadius: 5, background: color }} />
+              <div style={{ gridColumn: 9, gridRow: 1, textAlign: "center", fontSize: 20, fontWeight: 700, color: c.pr === "now" ? "var(--blue)" : "var(--grey)" }}>+{c.n}</div>
             </div>
           );
         })}
       </div>
 
-      <div style={{ marginTop: 22, display: "flex", gap: 16 }}>
-        <div className="card" style={{ flex: 1, padding: "14px 20px", background: "var(--pale)", border: "none" }}>
-          <span className="h4" style={{ fontSize: 17 }}>We control the shopper side, not the courier. </span>
-          <span className="small">So we fix what WhatsApp + voice can reach: the data, the reachability, the follow-up.</span>
+      <div className={`reveal ${lit ? "" : "hide"}`} style={{ marginTop: 12 }}>
+        <div className="card" style={{ padding: "12px 20px", background: "var(--pale)", border: "none", display: "flex", alignItems: "center", gap: 14 }}>
+          <span className="pill solid">18 of 30</span>
+          <span className="h4" style={{ fontSize: 16.5 }}>start with bad data or an unreachable shopper.</span>
+          <span className="small">Both are reachable on WhatsApp + voice. We can't control the courier, so we fix the shopper side.</span>
         </div>
       </div>
     </Slide>
@@ -237,6 +260,7 @@ export function WhySlide(p: SlideProps) {
 
 /* 05 — Prioritisation */
 export function PrioritySlide(p: SlideProps) {
+  const step = p.step ?? 0;
   const rows = [
     { name: "COD confirm + address fix", ch: "both" as const, i: 5, c: 5, e: 2, when: "M1 · MVP", tone: "solid" },
     { name: "Failed-delivery (NDR) rescue", ch: "both" as const, i: 4, c: 4, e: 3, when: "M3", tone: "blue" },
@@ -264,7 +288,7 @@ export function PrioritySlide(p: SlideProps) {
           {rows.map((r, idx) => (
             <div key={r.name} style={{
               display: "grid", gridTemplateColumns: "2.2fr 1.1fr 0.9fr 0.9fr 0.9fr 1.1fr", padding: "15px 20px", alignItems: "center",
-              borderTop: "1px solid var(--line)", background: idx === 0 ? "var(--pale)" : "#fff", opacity: r.tone === "grey" ? 0.6 : 1,
+              borderTop: "1px solid var(--line)", background: idx === 0 && step >= 1 ? "var(--pale)" : "#fff", opacity: r.tone === "grey" ? 0.6 : step >= 1 && idx > 2 ? 0.75 : 1, transition: "all .4s",
             }}>
               <span style={{ fontSize: 16, fontWeight: idx < 2 ? 600 : 500, color: "var(--navy)" }}>{r.name}</span>
               <span>{r.ch ? <span className="pill grey" style={{ fontSize: 12 }}>{r.ch === "both" ? "WA + Voice" : "WhatsApp"}</span> : <span className="caption">Platform</span>}</span>
@@ -274,7 +298,7 @@ export function PrioritySlide(p: SlideProps) {
           ))}
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-          <div className="card brand">
+          <div className={`card brand reveal ${step >= 1 ? "" : "hide"}`}>
             <div className="h4">How I scored</div>
             <ul className="bullets" style={{ marginTop: 10 }}>
               <li><b>Impact</b> — share of RTO it can remove</li>
@@ -282,7 +306,7 @@ export function PrioritySlide(p: SlideProps) {
               <li><b>Effort</b> — new integrations + build time</li>
             </ul>
           </div>
-          <div className="card brand">
+          <div className={`card brand reveal ${step >= 2 ? "" : "hide"}`}>
             <div className="h4">Two rules on top</div>
             <ul className="bullets" style={{ marginTop: 10 }}>
               <li><b>Data first:</b> insights + prepaid nudges need 2–3 months of our own data</li>
@@ -297,6 +321,7 @@ export function PrioritySlide(p: SlideProps) {
 
 /* 06 — Roadmap */
 export function RoadmapSlide(p: SlideProps) {
+  const step = p.step ?? 0;
   const phases = [
     { m: "M1", name: "Discover + MVP", goal: "Catch bad orders before they ship", items: ["10–15 merchant interviews + baseline", "COD confirm on WhatsApp", "Address fix in chat", "Voice fallback", "Shopify order tags"], tag: "Support", color: "var(--blue)" },
     { m: "M2", name: "Validate", goal: "Prove it without killing sales", items: ["15–20 beta merchants", "Holdout group vs Relay", "Track RTO + genuine-order drop", "Go / no-go gate"], tag: "Support", color: "var(--blue)" },
@@ -309,7 +334,7 @@ export function RoadmapSlide(p: SlideProps) {
     <Slide {...p} eyebrow="6-month roadmap" title={<>Stop the loss <span style={{ color: "var(--grey)" }}>→</span> rescue <span style={{ color: "var(--grey)" }}>→</span> learn <span style={{ color: "var(--grey)" }}>→</span> <span className="grad-text">grow</span></>}>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: 12, height: "100%" }}>
         {phases.map((ph, i) => (
-          <div key={ph.m} style={{ display: "flex", flexDirection: "column" }}>
+          <div key={ph.m} className={`reveal ${i <= step ? "" : "off"}`} style={{ display: "flex", flexDirection: "column" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <div style={{ height: 6, flex: 1, borderRadius: 3, background: ph.color }} />
               {i === 1 ? <span title="Gate" style={{ fontSize: 12, fontWeight: 600, color: "var(--warning)" }}>◆ gate</span> : null}

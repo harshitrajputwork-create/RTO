@@ -1,5 +1,4 @@
 import { useEffect, useState, type ComponentType } from "react";
-import { Logo } from "../slides/Slide";
 import { SetupPage } from "./pages/Setup";
 import { ConfirmLivePage, RescueLivePage } from "./pages/Live";
 import { InsightsPage } from "./pages/Insights";
@@ -9,38 +8,65 @@ export type PageProps = { go: (id: string) => void };
 
 type Chapter = {
   id: string;
-  label: string;
-  month: string;
-  sub: string;
+  nav: string;
+  icon: string;
+  crumb: string;
   title: string;
   lead: string;
+  month: string;
+  guide: { what: string; try: string; why: string };
   component: ComponentType<PageProps>;
 };
 
 export const CHAPTERS: Chapter[] = [
   {
-    id: "setup", label: "Set up the flow", month: "M1", sub: "Merchant, one-time",
-    title: "COD confirmation flow", lead: "Merchant sets it up once. Every new COD order runs through it automatically.",
+    id: "setup", nav: "Confirmation flow", icon: "⚙", crumb: "Automations", month: "M1 · MVP",
+    title: "COD confirmation flow", lead: "Runs automatically on every new Cash-on-Delivery order.",
+    guide: {
+      what: "The merchant's one-time setup. Every new COD order will run through this flow.",
+      try: "Switch the language to Hindi, turn the voice call off and on, change the fallback rule. The phone preview and cost update live.",
+      why: "Targets the two biggest controllable causes: bad addresses and unreachable shoppers. Costs about ₹0.72 per order vs ₹340 per RTO.",
+    },
     component: SetupPage,
   },
   {
-    id: "confirm", label: "COD confirmation", month: "M1", sub: "Live · shopper + merchant",
-    title: "COD confirmation · live", lead: "Every COD order confirmed and cleaned before it ships.",
+    id: "confirm", nav: "COD orders", icon: "☑", crumb: "RTO Suite", month: "M1 · MVP",
+    title: "COD orders", lead: "Confirmed, fixed or cancelled before dispatch.",
+    guide: {
+      what: "Left: the shopper's WhatsApp. Right: what the merchant sees, updating live.",
+      try: "Pick a scenario, then tap the glowing button in the chat (or press Space). Try #2 for a messy Hinglish address and #3 for the AI voice call. Click any order row for full details.",
+      why: "Bad orders are caught before shipping, so cancelling costs ₹0. Moves confirmation rate and RTO on confirmed orders (target −25% vs holdout).",
+    },
     component: ConfirmLivePage,
   },
   {
-    id: "rescue", label: "Failed deliveries", month: "M3", sub: "Live · NDR rescue",
-    title: "Failed-delivery rescue · live", lead: "Courier failed? Reach the shopper in minutes and re-attempt before the parcel comes back.",
+    id: "rescue", nav: "Failed deliveries", icon: "↻", crumb: "RTO Suite", month: "M3",
+    title: "Failed deliveries", lead: "Rescue the order inside the 24–48h window before it returns.",
+    guide: {
+      what: "The courier couldn't deliver. Relay reaches the shopper within minutes, before the parcel heads back.",
+      try: "Run ‘Fake attempt’: the shopper says nobody came, so the courier gets flagged. Then ‘Voice + new address’.",
+      why: "Saves orders already in transit. Moves NDR → delivered from 35% to 55%, and builds a courier scorecard.",
+    },
     component: RescueLivePage,
   },
   {
-    id: "insights", label: "Insights", month: "M4", sub: "Where RTO comes from",
-    title: "RTO insights", lead: "Three months of data tell us which pincodes, products and ads create RTO.",
+    id: "insights", nav: "RTO insights", icon: "◔", crumb: "RTO Suite", month: "M4",
+    title: "RTO insights", lead: "Last 90 days · all COD orders.",
+    guide: {
+      what: "After about 3 months of data: where RTO actually comes from.",
+      try: "Click a red pincode, then ‘Create rule →’ to act on it.",
+      why: "Turns RTO from a cost line into a map: pincode, product, ad source, courier. Feeds the Month 5 growth rules.",
+    },
     component: InsightsPage,
   },
   {
-    id: "rules", label: "Rules + growth", month: "M5", sub: "Prepaid nudge for risky orders",
-    title: "Risk rules + prepaid nudge", lead: "Nudge only risky orders to prepaid. Everyone else keeps one-tap COD.",
+    id: "rules", nav: "Risk rules", icon: "⚑", crumb: "RTO Suite", month: "M5",
+    title: "Risk rules", lead: "Applied right after the shopper confirms.",
+    guide: {
+      what: "Nudge only risky orders to prepaid. Everyone else keeps one-tap COD.",
+      try: "Change the discount, or turn on the ₹99 token. Watch the net saving: too big a discount stops paying for itself.",
+      why: "Prepaid RTO is about 5% vs about 35% for COD. That's the biggest lever, used without hurting conversion.",
+    },
     component: RulesPage,
   },
 ];
@@ -50,88 +76,128 @@ function idFromHash() {
   return CHAPTERS.some((c) => c.id === h) ? h : CHAPTERS[0].id;
 }
 
+function readGuidePref() {
+  try { return localStorage.getItem("relay-guide") !== "off"; } catch { return true; }
+}
+
 export default function ProtoApp() {
   const [active, setActive] = useState(idFromHash);
-  const [scale, setScale] = useState(1);
+  const [guide, setGuide] = useState(readGuidePref);
 
   useEffect(() => {
-    const fit = () => setScale(Math.min(window.innerWidth / 1600, window.innerHeight / 900));
-    fit();
-    window.addEventListener("resize", fit);
     const onHash = () => setActive(idFromHash());
-    window.addEventListener("hashchange", onHash);
-    return () => {
-      window.removeEventListener("resize", fit);
-      window.removeEventListener("hashchange", onHash);
+    const onKey = (e: KeyboardEvent) => {
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+      if (e.key.toLowerCase() === "g") setGuide((g) => !g);
     };
+    window.addEventListener("hashchange", onHash);
+    window.addEventListener("keydown", onKey);
+    return () => { window.removeEventListener("hashchange", onHash); window.removeEventListener("keydown", onKey); };
   }, []);
+
+  useEffect(() => {
+    try { localStorage.setItem("relay-guide", guide ? "on" : "off"); } catch { /* ignore */ }
+  }, [guide]);
 
   const go = (id: string) => {
     setActive(id);
     window.history.replaceState(null, "", `#${id}`);
+    window.scrollTo({ top: 0 });
   };
 
   const idx = CHAPTERS.findIndex((c) => c.id === active);
   const ch = CHAPTERS[idx];
   const Page = ch.component;
+  const prev = CHAPTERS[idx - 1];
   const next = CHAPTERS[idx + 1];
 
-  return (
-    <div className="stage">
-      <div className="canvas app" style={{ transform: `translate(-50%, -50%) scale(${scale})` }}>
-        <aside className="side">
-          <div style={{ padding: "22px 22px 18px" }}><Logo size={28} /></div>
-          <div className="store">
-            <div className="store-ava">U</div>
-            <div>
-              <div style={{ fontSize: 13.5, fontWeight: 600, color: "var(--navy)" }}>Urban Kurti</div>
-              <div style={{ fontSize: 11.5, color: "var(--grey)" }}>Shopify · 9.8K orders/mo</div>
-            </div>
-          </div>
-          <div className="side-label">Demo walkthrough</div>
-          <nav className="side-nav">
-            {CHAPTERS.map((c, i) => (
-              <button key={c.id} className={`side-item ${c.id === active ? "on" : ""} ${i < idx ? "past" : ""}`} onClick={() => go(c.id)}>
-                <span className="side-num">{i < idx ? "✓" : i + 1}</span>
-                <span style={{ flex: 1, textAlign: "left" }}>
-                  <span className="side-t">{c.label}</span>
-                  <span className="side-s">{c.sub}</span>
-                </span>
-                <span className={`side-m ${c.month === "M1" ? "m1" : ""}`}>{c.month}</span>
-              </button>
-            ))}
-          </nav>
-          <div style={{ marginTop: "auto", padding: 16 }}>
-            <div className="side-foot">
-              <div style={{ fontSize: 12, fontWeight: 600, color: "var(--navy)" }}>Roadmap view</div>
-              <div style={{ fontSize: 11.5, color: "var(--slate)", lineHeight: "17px", marginTop: 2 }}>
-                M1 MVP → M3 rescue → M4 insights → M5 growth
-              </div>
-            </div>
-            <a href="/#9" className="back-link">← Back to deck</a>
-          </div>
-        </aside>
+  const NavLink = ({ c }: { c: Chapter }) => (
+    <button className={`side-link ${c.id === active ? "on" : ""}`} onClick={() => go(c.id)}>
+      <span className="ic">{c.icon}</span>{c.nav}
+      {c.id === "rescue" || c.id === "rules" ? <span className="new">NEW</span> : null}
+    </button>
+  );
+  const Dim = ({ icon, label }: { icon: string; label: string }) => (
+    <div className="side-link dim"><span className="ic">{icon}</span>{label}</div>
+  );
 
-        <main className="main">
-          <header className="topbar">
-            <div>
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <span className={`pill ${ch.month === "M1" ? "solid" : "navy"}`} style={{ fontSize: 12 }}>{ch.month === "M1" ? "MVP · Month 1" : `Month ${ch.month.slice(1)}`}</span>
-                <h1 className="page-title">{ch.title}</h1>
-              </div>
-              <div className="page-lead">{ch.lead}</div>
-            </div>
-            {next ? (
-              <button className="btn-secondary" onClick={() => go(next.id)}>Next: {next.label} →</button>
-            ) : (
-              <a className="btn-secondary" href="/#10" style={{ textDecoration: "none" }}>Back to deck: metrics →</a>
-            )}
-          </header>
-          <div className="page" key={active}>
-            <Page go={go} />
+  return (
+    <div className="app">
+      <aside className="side">
+        <div className="side-brand">
+          <span className="side-mark">r</span>
+          <span style={{ color: "#fff", fontWeight: 700, fontSize: 17, letterSpacing: "-0.02em" }}>relay</span>
+        </div>
+        <div className="side-store">
+          <span className="ava">UK</span>
+          <div style={{ minWidth: 0 }}>
+            <div style={{ color: "#fff", fontSize: 13, fontWeight: 600 }}>Urban Kurti</div>
+            <div style={{ fontSize: 11.5, color: "#9fb2cf" }}>Shopify · Growth plan</div>
           </div>
-        </main>
+        </div>
+        <Dim icon="⌂" label="Home" />
+        <Dim icon="✉" label="Inbox" />
+        <Dim icon="📣" label="Campaigns" />
+        <div className="side-sec">Automations</div>
+        <NavLink c={CHAPTERS[0]} />
+        <div className="side-sec">RTO Suite</div>
+        {CHAPTERS.slice(1).map((c) => <NavLink key={c.id} c={c} />)}
+        <div className="side-sec">Workspace</div>
+        <Dim icon="☎" label="Voice agents" />
+        <Dim icon="⚙" label="Settings" />
+        <div className="side-bottom">
+          <a href="/#9" style={{ color: "#bcd3f5", textDecoration: "none", fontWeight: 600 }}>← Back to deck</a>
+          <div style={{ marginTop: 6 }}>Press <b style={{ color: "#fff" }}>G</b> to {guide ? "hide" : "show"} the guide</div>
+        </div>
+      </aside>
+
+      <div className="main">
+        <header className="appbar">
+          <div className="search">⌕ <span>Search orders, customers, phone numbers…</span></div>
+          <div style={{ flex: 1 }} />
+          <span className="pill success" style={{ fontSize: 11.5 }}>● WhatsApp connected</span>
+          <span className="pill grey" style={{ fontSize: 11.5 }}>● Shopify synced 1 min ago</span>
+          <button className="icon-btn" title="Notifications">🔔</button>
+          <span className="avatar">PS</span>
+        </header>
+
+        {guide && (
+          <section className="guide" key={`g-${active}`}>
+            <div>
+              <div className="guide-step">Demo guide · {idx + 1} of {CHAPTERS.length} · {ch.month}</div>
+              <div className="guide-title">{ch.nav}</div>
+              <div className="guide-dots">
+                {CHAPTERS.map((c, i) => <span key={c.id} className={i === idx ? "on" : ""} onClick={() => go(c.id)} title={c.nav} />)}
+              </div>
+            </div>
+            <div><div className="guide-k">What you're seeing</div><div className="guide-v">{ch.guide.what}</div></div>
+            <div><div className="guide-k">Try this</div><div className="guide-v">{ch.guide.try}</div></div>
+            <div><div className="guide-k">Why it matters</div><div className="guide-v">{ch.guide.why}</div></div>
+            <div className="guide-btns">
+              {next ? <button className="guide-btn" onClick={() => go(next.id)}>Next: {next.nav} →</button>
+                : <a className="guide-btn" href="/#10" style={{ textDecoration: "none", display: "grid", placeItems: "center" }}>Back to deck: metrics →</a>}
+              <div style={{ display: "flex", gap: 6 }}>
+                {prev && <button className="guide-btn ghost" style={{ flex: 1 }} onClick={() => go(prev.id)}>← Back</button>}
+                <button className="guide-btn ghost" style={{ flex: 1 }} onClick={() => setGuide(false)}>Hide (G)</button>
+              </div>
+            </div>
+          </section>
+        )}
+
+        <div className="page-head">
+          <div>
+            <div className="crumbs">{ch.crumb} / <b>{ch.nav}</b></div>
+            <h1 className="page-title">{ch.title}</h1>
+            <div className="page-lead">{ch.lead}</div>
+          </div>
+        </div>
+        <div className="page" key={active}>
+          <Page go={go} />
+        </div>
       </div>
+
+      {!guide && <button className="guide-pill" onClick={() => setGuide(true)}>Show guide (G)</button>}
     </div>
   );
 }

@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { stateAt, type Scenario } from "./engine";
 import { ProtoStage } from "./ProtoStage";
-import { Logo } from "../slides/Slide";
 
 const BRAND = "Urban Kurti";
 
@@ -162,12 +161,8 @@ function ConfirmDashboard({ cursors, activeId }: { cursors: Record<string, numbe
   return (
     <div className="dash" style={{ position: "relative" }}>
       <div className="dash-top">
-        <Logo size={22} />
-        <div className="dash-tabs">
-          <span className="dash-tab on">COD confirmation</span>
-          <span className="dash-tab">Failed deliveries</span>
-          <span className="dash-tab">Insights</span>
-        </div>
+        <span className="panel-t">COD orders · today</span>
+        <div className="dash-tabs"><span className="dash-tab on">All</span><span className="dash-tab">Awaiting reply</span><span className="dash-tab">Confirmed</span><span className="dash-tab">Cancelled</span></div>
         <span className="pill grey" style={{ fontSize: 11 }}>● Shopify connected</span>
       </div>
       <div className="kpis">

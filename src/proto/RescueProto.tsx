@@ -1,6 +1,5 @@
 import { stateAt, type Scenario } from "./engine";
 import { ProtoStage } from "./ProtoStage";
-import { Logo } from "../slides/Slide";
 
 const BRAND = "Urban Kurti";
 
@@ -133,12 +132,8 @@ function RescueDashboard({ cursors, activeId }: { cursors: Record<string, number
   return (
     <div className="dash">
       <div className="dash-top">
-        <Logo size={22} />
-        <div className="dash-tabs">
-          <span className="dash-tab">COD confirmation</span>
-          <span className="dash-tab on">Failed deliveries</span>
-          <span className="dash-tab">Insights</span>
-        </div>
+        <span className="panel-t">Failed deliveries · today</span>
+        <div className="dash-tabs"><span className="dash-tab on">All</span><span className="dash-tab">Open</span><span className="dash-tab">Rescued</span><span className="dash-tab">Flagged</span></div>
         <span className="pill grey" style={{ fontSize: 11 }}>● Courier feed live</span>
       </div>
       <div className="kpis">
