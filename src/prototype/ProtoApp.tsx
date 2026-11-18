@@ -49,9 +49,9 @@ export const CHAPTERS: Chapter[] = [
     id: "beta", nav: "Beta results", icon: "⚗", crumb: "RTO Suite", month: "M2 · Beta", tag: "M2", phase: "Month 2 · beta test + go/no-go gate", solves: "Does the MVP actually work?",
     title: "Beta results", lead: "Relay vs a holdout group, with the go/no-go decision.",
     guide: {
-      what: "Month 2: the MVP runs with 15–20 beta merchants. 20% of orders get no messages (the holdout), so we can measure the real effect.",
-      try: "Read the gate on the right: five pass/fail criteria agreed before the beta. Then see what we'll change before scaling.",
-      why: "Nothing after this gets built unless the gate passes. Proves RTO drops without losing genuine orders.",
+      what: "Did the MVP work? Relay vs a holdout group that got no messages.",
+      try: "Check the five gate numbers. All pass, so it's a GO.",
+      why: "Nothing after this gets built unless the gate passes.",
     },
     component: BetaPage,
   },
