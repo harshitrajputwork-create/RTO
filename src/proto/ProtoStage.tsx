@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 import type { Scenario } from "./engine";
 import { Phone } from "./Phone";
+import { stepper } from "./stepper";
 
 type Props = {
   scenarios: Scenario[];
@@ -38,6 +39,27 @@ export function ProtoStage({ scenarios, brand, hint, dashboard }: Props) {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [next]);
+
+  // expose to the global prev/next bar
+  useEffect(() => {
+    const i = scenarios.findIndex((s) => s.id === activeId);
+    const c = Math.max(cursor, 0);
+    stepper.stage = {
+      label: `Scenario ${i + 1}/${scenarios.length} · step ${c + 1}/${active.steps.length}`,
+      next: () => {
+        if (c < active.steps.length - 1) { next(); return true; }
+        if (i < scenarios.length - 1) { setActiveId(scenarios[i + 1].id); return true; }
+        return false;
+      },
+      prev: () => {
+        if (c > 0) { setCursors((cs) => ({ ...cs, [activeId]: c - 1 })); return true; }
+        if (i > 0) { setActiveId(scenarios[i - 1].id); return true; }
+        return false;
+      },
+    };
+    stepper.notify();
+  }, [activeId, cursor, scenarios, active, next]);
+  useEffect(() => () => { stepper.stage = null; stepper.notify(); }, []);
 
   const pct = Math.round(((Math.max(cursor, 0) + 1) / active.steps.length) * 100);
   const done = cursor >= active.steps.length - 1;

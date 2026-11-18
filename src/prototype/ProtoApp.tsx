@@ -1,4 +1,5 @@
-import { useEffect, useState, type ComponentType } from "react";
+import { useEffect, useReducer, useRef, useState, type ComponentType } from "react";
+import { stepper } from "../proto/stepper";
 import { SetupPage } from "./pages/Setup";
 import { ConfirmLivePage, RescueLivePage } from "./pages/Live";
 import { InsightsPage } from "./pages/Insights";
@@ -116,6 +117,10 @@ function readGuidePref() {
 export default function ProtoApp() {
   const [active, setActive] = useState(idFromHash);
   const [guide, setGuide] = useState(readGuidePref);
+  const [, bump] = useReducer((x: number) => x + 1, 0);
+  stepper.notify = bump;
+
+  const stepRef = useRef<(d: 1 | -1) => void>(() => {});
 
   useEffect(() => {
     const onHash = () => setActive(idFromHash());
@@ -123,6 +128,8 @@ export default function ProtoApp() {
       const tag = (e.target as HTMLElement)?.tagName;
       if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
       if (e.key.toLowerCase() === "g") setGuide((g) => !g);
+      if (e.key === "ArrowRight") { e.preventDefault(); stepRef.current(1); }
+      if (e.key === "ArrowLeft") { e.preventDefault(); stepRef.current(-1); }
     };
     window.addEventListener("hashchange", onHash);
     window.addEventListener("keydown", onKey);
@@ -144,6 +151,15 @@ export default function ProtoApp() {
   const Page = ch.component;
   const prev = CHAPTERS[idx - 1];
   const next = CHAPTERS[idx + 1];
+
+  const step = (dir: 1 | -1) => {
+    const st = stepper.stage;
+    if (st && (dir === 1 ? st.next() : st.prev())) return;
+    const target = CHAPTERS[idx + dir];
+    if (target) go(target.id);
+    else if (dir === 1) window.location.href = "/#10";
+  };
+  stepRef.current = step;
 
   const NavLink = ({ c }: { c: Chapter }) => (
     <button className={`side-link ${c.id === active ? "on" : ""}`} onClick={() => go(c.id)}>
@@ -232,6 +248,15 @@ export default function ProtoApp() {
         <div className="page" key={active}>
           <Page go={go} />
         </div>
+      </div>
+
+      <div className="stepbar">
+        <button onClick={() => step(-1)} disabled={idx === 0 && !stepper.stage} title="Previous (←)">‹</button>
+        <div className="stepbar-mid">
+          <b>{idx + 1}/{CHAPTERS.length} · {ch.nav}</b>
+          <span>{stepper.stage ? stepper.stage.label : ch.tag}</span>
+        </div>
+        <button className="fwd" onClick={() => step(1)} title="Next (→)">›</button>
       </div>
 
       {!guide && <button className="guide-pill" onClick={() => setGuide(true)}>Show guide (G)</button>}
