@@ -14,13 +14,16 @@ type Chapter = {
   title: string;
   lead: string;
   month: string;
+  tag: string;
+  phase: string;
+  solves: string;
   guide: { what: string; try: string; why: string };
   component: ComponentType<PageProps>;
 };
 
 export const CHAPTERS: Chapter[] = [
   {
-    id: "setup", nav: "Confirmation flow", icon: "⚙", crumb: "Automations", month: "M1 · MVP",
+    id: "setup", nav: "Confirmation flow", icon: "⚙", crumb: "Automations", month: "M1 · MVP", tag: "M1", phase: "Month 1 · MVP", solves: "Bad address / contact + fake orders",
     title: "COD confirmation flow", lead: "Runs automatically on every new Cash-on-Delivery order.",
     guide: {
       what: "The merchant's one-time setup. Every new COD order will run through this flow.",
@@ -30,7 +33,7 @@ export const CHAPTERS: Chapter[] = [
     component: SetupPage,
   },
   {
-    id: "confirm", nav: "COD orders", icon: "☑", crumb: "RTO Suite", month: "M1 · MVP",
+    id: "confirm", nav: "COD orders", icon: "☑", crumb: "RTO Suite", month: "M1 · MVP", tag: "M1", phase: "Month 1 · MVP", solves: "Bad address / contact + fake orders",
     title: "COD orders", lead: "Confirmed, fixed or cancelled before dispatch.",
     guide: {
       what: "Left: the shopper's WhatsApp. Right: what the merchant sees, updating live.",
@@ -40,7 +43,7 @@ export const CHAPTERS: Chapter[] = [
     component: ConfirmLivePage,
   },
   {
-    id: "rescue", nav: "Failed deliveries", icon: "↻", crumb: "RTO Suite", month: "M3",
+    id: "rescue", nav: "Failed deliveries", icon: "↻", crumb: "RTO Suite", month: "M3", tag: "M3", phase: "Month 3 · after the M2 gate", solves: "Not reachable at the door",
     title: "Failed deliveries", lead: "Rescue the order inside the 24–48h window before it returns.",
     guide: {
       what: "The courier couldn't deliver. Relay reaches the shopper within minutes, before the parcel heads back.",
@@ -50,7 +53,7 @@ export const CHAPTERS: Chapter[] = [
     component: RescueLivePage,
   },
   {
-    id: "insights", nav: "RTO insights", icon: "◔", crumb: "RTO Suite", month: "M4",
+    id: "insights", nav: "RTO insights", icon: "◔", crumb: "RTO Suite", month: "M4", tag: "M4", phase: "Month 4 · needs ~3 months of data", solves: "Where RTO comes from (pincode, product, courier)",
     title: "RTO insights", lead: "Last 90 days · all COD orders.",
     guide: {
       what: "After about 3 months of data: where RTO actually comes from.",
@@ -60,7 +63,7 @@ export const CHAPTERS: Chapter[] = [
     component: InsightsPage,
   },
   {
-    id: "rules", nav: "Risk rules", icon: "⚑", crumb: "RTO Suite", month: "M5",
+    id: "rules", nav: "Risk rules", icon: "⚑", crumb: "RTO Suite", month: "M5", tag: "M5", phase: "Month 5 · growth phase", solves: "Weak intent: COD with no skin in the game",
     title: "Risk rules", lead: "Applied right after the shopper confirms.",
     guide: {
       what: "Nudge only risky orders to prepaid. Everyone else keeps one-tap COD.",
@@ -115,7 +118,7 @@ export default function ProtoApp() {
   const NavLink = ({ c }: { c: Chapter }) => (
     <button className={`side-link ${c.id === active ? "on" : ""}`} onClick={() => go(c.id)}>
       <span className="ic">{c.icon}</span>{c.nav}
-      {c.id === "rescue" || c.id === "rules" ? <span className="new">NEW</span> : null}
+      <span className={`mtag ${c.tag === "M1" ? "mvp" : ""}`}>{c.tag}</span>
     </button>
   );
   const Dim = ({ icon, label }: { icon: string; label: string }) => (
@@ -190,6 +193,10 @@ export default function ProtoApp() {
             <div className="crumbs">{ch.crumb} / <b>{ch.nav}</b></div>
             <h1 className="page-title">{ch.title}</h1>
             <div className="page-lead">{ch.lead}</div>
+          </div>
+          <div className="ctx">
+            <span className={`ctx-phase ${ch.tag === "M1" ? "mvp" : ""}`}>{ch.phase}</span>
+            <span className="ctx-solves">Solves: <b>{ch.solves}</b></span>
           </div>
         </div>
         <div className="page" key={active}>
