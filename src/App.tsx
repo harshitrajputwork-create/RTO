@@ -45,7 +45,7 @@ export default function App() {
     };
   }, [index, go]);
 
-  const Current = SLIDES[index].component;
+  const Current = SLIDES[Math.min(index, SLIDES.length - 1)].component;
 
   return (
     <div className="stage">

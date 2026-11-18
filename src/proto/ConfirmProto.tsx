@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { stateAt, type Scenario } from "./engine";
 import { ProtoStage } from "./ProtoStage";
 import { Logo } from "../slides/Slide";
@@ -155,9 +156,11 @@ function ConfirmDashboard({ cursors, activeId }: { cursors: Record<string, numbe
   const saved = rows.reduce((a, r) => a + Number(r.state.saved ?? 0), 0);
   const active = rows.find((r) => r.id === activeId)!;
   const amounts: Record<string, string> = { happy: "₹1,299", address: "₹899", voice: "₹749", cancel: "₹1,099" };
+  const [open, setOpen] = useState<string | null>(null);
+  const openRow = rows.find((r) => r.id === open);
 
   return (
-    <div className="dash">
+    <div className="dash" style={{ position: "relative" }}>
       <div className="dash-top">
         <Logo size={22} />
         <div className="dash-tabs">
@@ -178,7 +181,7 @@ function ConfirmDashboard({ cursors, activeId }: { cursors: Record<string, numbe
           <span>Order</span><span>Customer</span><span>Amount</span><span>Relay status</span><span>Fulfilment</span>
         </div>
         {rows.map((r) => (
-          <div key={r.id} className={`tr ${r.id === activeId ? "active" : ""}`} style={{ gridTemplateColumns: "70px 1fr 80px 1.4fr 1.1fr" }}>
+          <div key={r.id} className={`tr click ${r.id === activeId ? "active" : ""}`} style={{ gridTemplateColumns: "70px 1fr 80px 1.4fr 1.1fr" }} onClick={() => setOpen(r.id)} title="Open order details">
             <span style={{ fontWeight: 600, color: "var(--navy)" }}>{r.order}</span>
             <span>{r.customer}</span>
             <span>{amounts[r.id]}</span>
@@ -200,13 +203,136 @@ function ConfirmDashboard({ cursors, activeId }: { cursors: Record<string, numbe
       <div className="timeline">
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
           <span className="h4" style={{ fontSize: 14 }}>Activity · {active.order} {active.customer}</span>
-          {active.state.tag ? <span className="pill navy" style={{ fontSize: 11 }}>Shopify tag: {String(active.state.tag)}</span> : null}
+          <button className="btn-secondary" style={{ height: 28, fontSize: 12 }} onClick={() => setOpen(active.id)}>Order details →</button>
         </div>
         {active.events.map((e, i) => (
           <div key={i} className="tl-item">
             <span className="tm">{e.time}</span><span className="bul" /><span>{e.text}</span>
           </div>
         ))}
+      </div>
+      {openRow && (
+        <>
+          <div className="drawer-back" onClick={() => setOpen(null)} />
+          <OrderDrawer
+            id={openRow.id} order={openRow.order} customer={openRow.customer} amount={amounts[openRow.id]}
+            state={openRow.state} events={openRow.events} onClose={() => setOpen(null)}
+          />
+        </>
+      )}
+    </div>
+  );
+}
+
+const DETAILS: Record<string, {
+  item: string; city: string; risk: { k: string; v: string; tone: "error" | "warning" | "success" }[];
+  addrOld?: string; addrNew?: string; note?: string;
+}> = {
+  happy: {
+    item: "Cotton kurta set · 1", city: "Jaipur 302006",
+    risk: [
+      { k: "Pincode RTO (last 90 days)", v: "14% · low", tone: "success" },
+      { k: "Customer history", v: "2 delivered, 0 RTO", tone: "success" },
+      { k: "Address quality", v: "Complete", tone: "success" },
+    ],
+  },
+  address: {
+    item: "Printed palazzo · 1", city: "Bhilwara 311001",
+    risk: [
+      { k: "Pincode RTO (last 90 days)", v: "31% · high", tone: "error" },
+      { k: "Customer history", v: "First order", tone: "warning" },
+      { k: "Address quality", v: "No house no.", tone: "error" },
+    ],
+    addrOld: "Near Hanuman mandir, Sector 4, Bhilwara 311001",
+    addrNew: "House 22, Lane 3, Behind Hanuman Mandir, Sector 4, Bhilwara 311001",
+    note: "Deliver after 6 PM (from shopper's reply)",
+  },
+  voice: {
+    item: "Cotton dupatta · 2", city: "Bareilly 243001",
+    risk: [
+      { k: "Pincode RTO (last 90 days)", v: "27% · medium", tone: "warning" },
+      { k: "Customer history", v: "First order", tone: "warning" },
+      { k: "WhatsApp", v: "No reply in 4h", tone: "warning" },
+    ],
+    note: "Deliver on Thursday (from AI call)",
+  },
+  cancel: {
+    item: "Silk dupatta · 1", city: "Kanpur 208001",
+    risk: [
+      { k: "Pincode RTO (last 90 days)", v: "22% · medium", tone: "warning" },
+      { k: "Customer history", v: "1 RTO before", tone: "error" },
+      { k: "Cancel reason", v: "Ordered by mistake", tone: "warning" },
+    ],
+  },
+};
+
+function OrderDrawer({ id, order, customer, amount, state, events, onClose }: {
+  id: string; order: string; customer: string; amount: string;
+  state: Record<string, string | number | boolean>; events: { time: string; text: string }[]; onClose: () => void;
+}) {
+  const d = DETAILS[id];
+  const call = CONFIRM_SCENARIOS.find((s) => s.id === id)?.steps.find((st) => st.kind === "call");
+  const reached = events.some((e) => e.text.toLowerCase().includes("call"));
+  return (
+    <div className="drawer">
+      <div style={{ padding: "14px 18px", display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+        <div>
+          <div style={{ fontSize: 18, fontWeight: 600, color: "var(--navy)" }}>{order} · {customer}</div>
+          <div className="caption">{d.item} · {amount} COD · {d.city}</div>
+        </div>
+        <button onClick={onClose} style={{ fontSize: 18, color: "var(--grey)" }}>✕</button>
+      </div>
+      <div style={{ padding: "0 18px 12px", display: "flex", gap: 8, flexWrap: "wrap" }}>
+        {state.status ? <span className={`pill ${TONE[String(state.tone)] ?? "grey"}`} style={{ fontSize: 11.5 }}>{String(state.status)}</span> : null}
+        {state.tag ? <span className="pill navy" style={{ fontSize: 11.5 }}>Shopify tag: {String(state.tag)}</span> : null}
+      </div>
+      <div style={{ overflowY: "auto", flex: 1 }}>
+        <div className="dr-sec">
+          <div className="dr-h">Risk signals</div>
+          {d.risk.map((r) => (
+            <div key={r.k} className="risk-row">
+              <span>{r.k}</span>
+              <span className={`pill ${r.tone}`} style={{ fontSize: 11, padding: "0 8px" }}>{r.v}</span>
+            </div>
+          ))}
+        </div>
+        {d.addrOld && (
+          <div className="dr-sec">
+            <div className="dr-h">Address</div>
+            <div className="addr old">{d.addrOld}</div>
+            {state.tag === "relay-address-fixed" || String(state.status ?? "").includes("updated") ? (
+              <div className="addr new">✓ {d.addrNew}</div>
+            ) : <div className="caption" style={{ marginTop: 6 }}>Waiting for shopper…</div>}
+          </div>
+        )}
+        {d.note && (state.ship || String(state.status ?? "").includes("updated")) ? (
+          <div className="dr-sec">
+            <div className="dr-h">Delivery note → courier label</div>
+            <div style={{ fontSize: 13, color: "var(--navy)", fontWeight: 500 }}>🕕 {d.note}</div>
+          </div>
+        ) : null}
+        {call && reached && (
+          <div className="dr-sec">
+            <div className="dr-h">AI call transcript · 0:48</div>
+            {(call.lines ?? []).map((l, i) => (
+              <div key={i} style={{ fontSize: 12.5, lineHeight: "18px", padding: "3px 0", color: l.who === "ai" ? "var(--slate)" : "var(--navy)" }}>
+                <b style={{ fontWeight: 600 }}>{l.who === "ai" ? "AI: " : "Shopper: "}</b>{l.text}
+              </div>
+            ))}
+          </div>
+        )}
+        <div className="dr-sec">
+          <div className="dr-h">Timeline</div>
+          {events.map((e, i) => (
+            <div key={i} className="tl-item"><span className="tm">{e.time}</span><span className="bul" /><span>{e.text}</span></div>
+          ))}
+        </div>
+      </div>
+      <div style={{ padding: 14, borderTop: "1px solid var(--line)", display: "flex", gap: 8 }}>
+        <button className="btn-primary" style={{ flex: 1, justifyContent: "center" }} onClick={onClose}>
+          {state.ship && state.ship !== "Not shipped" ? "Ship now" : "Hold order"}
+        </button>
+        <button className="btn-secondary" style={{ height: 40 }}>📞 Call manually</button>
       </div>
     </div>
   );

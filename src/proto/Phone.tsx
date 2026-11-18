@@ -119,3 +119,50 @@ function CallOverlay({ lines, brand }: { lines: NonNullable<Step["lines"]>; bran
     </div>
   );
 }
+
+export type StaticMsg = { me?: boolean; text: string; buttons?: string[]; time?: string; sys?: boolean };
+
+/** Read-only phone used for template previews. */
+export function StaticPhone({ brand, messages, height = 640 }: { brand: string; messages: StaticMsg[]; height?: number }) {
+  const body = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    body.current?.scrollTo({ top: body.current.scrollHeight });
+  }, [messages]);
+  return (
+    <div className="phone" style={{ height }}>
+      <div className="phone-notch" />
+      <div className="wa-header">
+        <div className="wa-avatar">{brand[0]}</div>
+        <div style={{ flex: 1 }}>
+          <div className="wa-name">{brand} <span className="wa-verified">✓</span></div>
+          <div className="wa-sub">Business account · via Relay</div>
+        </div>
+        <span style={{ opacity: 0.9 }}>⋮</span>
+      </div>
+      <div className="wa-body" ref={body}>
+        <div className="wa-day">Preview</div>
+        {messages.map((m, i) =>
+          m.sys ? (
+            <div key={i} className="wa-sys">{m.text}</div>
+          ) : (
+            <div key={i} className={`wa-row ${m.me ? "me" : ""}`}>
+              <div className={`wa-bubble ${m.me ? "me" : ""}`}>
+                <div style={{ whiteSpace: "pre-line" }}>{m.text}</div>
+                <div className="wa-time">{m.time ?? "10:02"}</div>
+                {m.buttons && (
+                  <div className="wa-buttons">
+                    {m.buttons.map((b) => <span key={b} className="wa-btn" style={{ textAlign: "center" }}>{b}</span>)}
+                  </div>
+                )}
+              </div>
+            </div>
+          )
+        )}
+      </div>
+      <div className="wa-composer">
+        <div className="wa-input">Message</div>
+        <span className="wa-send" style={{ display: "grid", placeItems: "center" }}>➤</span>
+      </div>
+    </div>
+  );
+}
